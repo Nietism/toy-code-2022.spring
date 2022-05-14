@@ -195,7 +195,7 @@ class BartAttention(nn.Module):
         # get query proj
         query_states = self.q_proj(hidden_states) * self.scaling
 
-        # get key, value proj
+        # get key, value proj in different scenario
         ################################################## 
         # 1. cross attn, and `past_key_value` received
         if is_cross_attention and past_key_value is not None:
@@ -214,7 +214,7 @@ class BartAttention(nn.Module):
             # reuse k, v, self_attention
             key_states = self._shape(self.k_proj(hidden_states), -1, bsz)
             value_states = self._shape(self.v_proj(hidden_states), -1, bsz)
-            key_states = torch.cat([past_key_value[0], key_states], dim=2)
+            key_states = torch.cat([past_key_value[0], key_states], dim=2) # (bsz, num_heads, seq_len, head_dim)
             value_states = torch.cat([past_key_value[1], value_states], dim=2)
         ##################################################
         # 4. not cross attn, no `past_key_value` received(i.e., vanilla self-attn)
