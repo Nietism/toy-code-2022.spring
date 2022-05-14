@@ -122,6 +122,7 @@ class BartLearnedPositionalEmbedding(nn.Embedding):
     This module learns positional embeddings up to a fixed maximum size.
     """
 
+    # TODO(lium): Why offset?
     def __init__(self, num_embeddings: int, embedding_dim: int):
         # Bart is set up so that if padding_idx is specified then offset the embedding ids by 2
         # and adjust num_embeddings appropriately. Other models don't have this hack
@@ -149,19 +150,21 @@ class BartAttention(nn.Module):
         bias: bool = True,
     ):
         super().__init__()
-        self.embed_dim = embed_dim
+        self.embed_dim = embed_dim # dim of attention layer
         self.num_heads = num_heads
         self.dropout = dropout
         self.head_dim = embed_dim // num_heads
 
+        # validation of head_dim and num_heads
         if (self.head_dim * num_heads) != self.embed_dim:
             raise ValueError(
                 f"embed_dim must be divisible by num_heads (got `embed_dim`: {self.embed_dim}"
                 f" and `num_heads`: {num_heads})."
             )
-        self.scaling = self.head_dim**-0.5
-        self.is_decoder = is_decoder
+        self.scaling = self.head_dim**-0.5 # scaling factor in the `scaled dot-product attention`
+        self.is_decoder = is_decoder # flag variable
 
+        # W^{q}, W^{k}, W^{v} and W^{out}
         self.k_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
         self.v_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
         self.q_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
@@ -183,31 +186,43 @@ class BartAttention(nn.Module):
 
         # if key_value_states are provided this layer is used as a cross-attention layer
         # for the decoder
+        # Encoder-Decoder Cross Attention Mechanism
+        # k and v is from encoder, q is from decoder
         is_cross_attention = key_value_states is not None
 
-        bsz, tgt_len, _ = hidden_states.size()
+        bsz, tgt_len, _ = hidden_states.size() # initialize hidden_states as query
 
         # get query proj
         query_states = self.q_proj(hidden_states) * self.scaling
+
         # get key, value proj
+        ################################################## 
+        # 1. cross attn, and `past_key_value` received
         if is_cross_attention and past_key_value is not None:
             # reuse k,v, cross_attentions
             key_states = past_key_value[0]
             value_states = past_key_value[1]
+        ################################################## 
+        # 2. cross attn, but no `past_key_value`
         elif is_cross_attention:
             # cross_attentions
             key_states = self._shape(self.k_proj(key_value_states), -1, bsz)
             value_states = self._shape(self.v_proj(key_value_states), -1, bsz)
+        ################################################## 
+        # 3. not cross attn, but `past_key_value` received
         elif past_key_value is not None:
             # reuse k, v, self_attention
             key_states = self._shape(self.k_proj(hidden_states), -1, bsz)
             value_states = self._shape(self.v_proj(hidden_states), -1, bsz)
             key_states = torch.cat([past_key_value[0], key_states], dim=2)
             value_states = torch.cat([past_key_value[1], value_states], dim=2)
+        ##################################################
+        # 4. not cross attn, no `past_key_value` received(i.e., vanilla self-attn)
         else:
             # self_attention
             key_states = self._shape(self.k_proj(hidden_states), -1, bsz)
             value_states = self._shape(self.v_proj(hidden_states), -1, bsz)
+        ##################################################
 
         if self.is_decoder:
             # if cross_attention save Tuple(torch.Tensor, torch.Tensor) of all cross attention key/value_states.
@@ -1256,6 +1271,10 @@ class BartModel(BartPretrainedModel):
             return decoder_outputs + encoder_outputs
 
         return Seq2SeqModelOutput(
+            # last_hidden_state (Tensor): (batch_size, sequence_length, hidden_size)
+            # Sequence of hidden-states at the output of the last layer of the decoder of the model.
+            # If `past_key_values` is used, 
+            # only the last hidden-state of the sequences of shape (batch_size, 1, hidden_size) is output.
             last_hidden_state=decoder_outputs.last_hidden_state,
             past_key_values=decoder_outputs.past_key_values,
             decoder_hidden_states=decoder_outputs.hidden_states,
