@@ -235,12 +235,18 @@ class BartAttention(nn.Module):
             past_key_value = (key_states, value_states)
 
         proj_shape = (bsz * self.num_heads, -1, self.head_dim)
+        # self._shape() ->  (Tensor): (bsz, num_heads, seq_len, head_dim)
         query_states = self._shape(query_states, tgt_len, bsz).view(*proj_shape)
         key_states = key_states.view(*proj_shape)
         value_states = value_states.view(*proj_shape)
 
+        # now, shape of q/k/v is: (bsz * self.num_heads, seq_len, self.head_dim)
         src_len = key_states.size(1)
+        # Q @ K^{T}
+        # (bsz * self.num_heads, tgt_len, self.head_dim) @ (bsz * self.num_heads, self.head_dim, src_len)
         attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
+        # shape of attn_weights should be
+        # (bsz * self.num_heads, tgt_len, src_len)
 
         if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
             raise ValueError(
@@ -253,7 +259,7 @@ class BartAttention(nn.Module):
                 raise ValueError(
                     f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is {attention_mask.size()}"
                 )
-            attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask
+            attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask # broadcasting
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
