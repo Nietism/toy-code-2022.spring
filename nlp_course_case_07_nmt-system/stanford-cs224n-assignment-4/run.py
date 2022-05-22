@@ -349,6 +349,7 @@ def main():
 
     # seed the random number generators
     seed = int(args['--seed'])
+    seed = 42
     torch.manual_seed(seed)
     if args['--cuda']:
         torch.cuda.manual_seed(seed)

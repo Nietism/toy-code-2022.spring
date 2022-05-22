@@ -34,8 +34,12 @@ def pad_sents(sents, pad_token):
     sents_padded = []
 
     ### YOUR CODE HERE (~6 Lines)
+    ### TODO(DONE, lium): 
+    ###     Complete this function.
 
-
+    max_length = len(max(sents, key=lambda x: len(x)))
+    for sent in sents:
+        sents_padded.append(sent + [pad_token] * (max_length - len(sent)))
 
     ### END YOUR CODE
 
