@@ -2,6 +2,7 @@ Repetition (self-amplification effect) is more complicated. The solutions in the
 
 
 
+
 To reduce repetition:
 
 + Don't repeat *n*-grams (*n*-gram penalty). 
@@ -14,7 +15,9 @@ To reduce repetition:
 
 
 
+
+
 More information: 
 
-cs224n-2023-lecture-10-NLG: http://web.stanford.edu/class/cs224n/slides/cs224n-2023-lecture10-nlg.pdf
+***cs224n-2023-lecture-10-NLG***: http://web.stanford.edu/class/cs224n/slides/cs224n-2023-lecture10-nlg.pdf
 
