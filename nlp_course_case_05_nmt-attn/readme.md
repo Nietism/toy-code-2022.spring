@@ -7,7 +7,9 @@ To reduce repetition:
 
 + Don't repeat *n*-grams (*n*-gram penalty). 
 
-  For example, the ***no_repeat_ngram_size*** parameter in Huggingface transformers: https://github.com/huggingface/transformers/blob/v4.26.1/src/transformers/generation/configuration_utils.py#L38
+  For example, the ***no_repeat_ngram_size*** parameter in Huggingface transformers:
+  https://github.com/huggingface/transformers/blob/v4.26.1/src/transformers/generation/configuration_utils.py#L138
+  https://github.com/huggingface/transformers/blob/v4.26.1/src/transformers/generation/configuration_utils.py#L247
 
 + Use a different training objective.
 
