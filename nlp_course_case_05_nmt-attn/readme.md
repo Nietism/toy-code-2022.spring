@@ -9,10 +9,10 @@ To reduce repetition:
 
   For example, the ***no_repeat_ngram_size*** parameter in Huggingface transformers:
   https://github.com/huggingface/transformers/blob/v4.26.1/src/transformers/generation/configuration_utils.py#L138
-  https://github.com/huggingface/transformers/blob/v4.26.1/src/transformers/generation/configuration_utils.py#L247
 
   There is also a parameter ***repetition_penalty*** as well. See [this paper](https://arxiv.org/pdf/1909.05858.pdf) for more details.
-
+  https://github.com/huggingface/transformers/blob/v4.26.1/src/transformers/generation/configuration_utils.py#L127
+  
 + Use a different training objective.
 
 + Use a different decoding objective.
