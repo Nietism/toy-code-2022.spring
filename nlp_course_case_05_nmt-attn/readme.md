@@ -17,7 +17,7 @@ To reduce repetition:
 
 + Use a different decoding objective.
 
-
++ RLHF to align language models with users intent.
 
 
 
